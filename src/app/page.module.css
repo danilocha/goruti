@@ -1,0 +1,10 @@
+.page {
+  min-height: 100vh;
+  background: #F1F5F9;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  padding-bottom: 48px;
+}
+
+.main {
+  padding: 14px 13px 0;
+}

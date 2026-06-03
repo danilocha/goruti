@@ -1,0 +1,55 @@
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  background: #fff;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 0 6px;
+}
+
+.tab {
+  padding: 9px 10px 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.tab:hover {
+  opacity: 0.85;
+}
+
+.tab.active {
+  opacity: 1;
+}
+
+.tabLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.tabLabel.activeLabel {
+  font-weight: 800;
+}
+
+.progressTrack {
+  width: 28px;
+  height: 3px;
+  background: #E5E7EB;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}

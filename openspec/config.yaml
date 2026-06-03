@@ -1,0 +1,50 @@
+# openspec/config.yaml
+schema: spec-driven
+
+context: |
+  Tech stack: Next.js 16 (App Router), TypeScript, CSS Modules, Vitest, Playwright
+  Architecture: Next.js App Router with container-presentational split, useReducer + Context for state, server/client component boundaries
+  Testing: Vitest (83 unit + component tests), Playwright (5 E2E tests)
+  Style: CSS Modules + CSS Custom Properties for dynamic day theming, Spanish UI labels
+  Files: src/ directory with data/ (types, constants, tasks, utils, reducer), hooks/ (useChecklist, useLocalStorage), components/ (6 presentational components + styles), app/ (layout, page, providers, globals)
+  Domain: Household chore management for two people (D & A) with daily/weekend routines, progress tracking, localStorage persistence
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+
+testing:
+  strict_tdd: false
+  runner: null
+  layers:
+    unit: false
+    integration: false
+    e2e: false
+  coverage: false
+  quality:
+    linter: false
+    type_checker: false
+    formatter: false
+  note: >
+    No package.json or test runner detected. Testing will be initialized
+    when the Next.js conversion is set up. Recommend Jest or Vitest with
+    React Testing Library.

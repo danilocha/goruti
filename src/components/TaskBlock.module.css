@@ -1,0 +1,51 @@
+.block {
+  margin-bottom: 14px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-bottom: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748B;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.toggle:hover {
+  opacity: 0.8;
+}
+
+.arrow {
+  font-size: 8px;
+  color: #94A3B8;
+  width: 12px;
+  text-align: center;
+}
+
+.label {
+  flex: 1;
+}
+
+.count {
+  font-weight: 500;
+  color: #94A3B8;
+  letter-spacing: 0;
+  font-size: 9px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #E2E8F0;
+  border-left: 4px solid var(--day-border, #3B82F6);
+  overflow: hidden;
+}

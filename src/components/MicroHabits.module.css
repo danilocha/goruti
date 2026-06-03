@@ -1,0 +1,42 @@
+.section {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid #E2E8F0;
+  margin-top: 4px;
+}
+
+.title {
+  font-size: 10px;
+  font-weight: 800;
+  color: #9CA3AF;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.habit {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #F0FDF4;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.text {
+  line-height: 1.3;
+}

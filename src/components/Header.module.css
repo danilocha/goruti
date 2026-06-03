@@ -1,0 +1,53 @@
+.header {
+  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);
+  padding: 22px 18px 14px;
+  color: #fff;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.subtitle {
+  font-size: 10px;
+  color: #94A3B8;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.dayName {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 900;
+  font-family: Georgia, serif;
+  letter-spacing: -0.5px;
+}
+
+.legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.legendBadge {
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-weight: 800;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.legendName {
+  color: #94A3B8;
+}
