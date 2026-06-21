@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { DayName, RoutineTask } from "@/data/types";
-import type { TaskInput } from "@/hooks/useRoutines";
+import type { TaskInput } from "@/data/types";
 import { validateTaskInput, buildSchedule } from "@/lib/routines/routineHelpers";
 import DayPicker from "./DayPicker";
 import styles from "./TaskEditor.module.css";

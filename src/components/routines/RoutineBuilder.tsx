@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useRoutines } from "@/hooks/useRoutines";
-import type { RoutineWithTasks, TaskInput } from "@/hooks/useRoutines";
+import type { RoutineWithTasks } from "@/hooks/useRoutines";
 import type { RoutineTemplate } from "@/data/templates";
+import type { TaskInput } from "@/data/types";
+import * as actions from "@/lib/actions/routines";
 import RoutineList from "./RoutineList";
 import RoutineEditor from "./RoutineEditor";
 import TemplateGallery from "./TemplateGallery";
@@ -22,72 +24,72 @@ type View =
 
 /**
  * RoutineBuilder — orchestrator component for the Rutinas tab.
- * Manages view state: list → create/edit routine → back to list.
+ *
+ * Reads via useRoutines, mutates via server actions (from @/lib/actions/routines).
+ * Uses router.refresh() after mutations to re-render the Home Server Component.
  */
 export default function RoutineBuilder({ groupId }: Props) {
-  const {
-    routines,
-    loading,
-    error,
-    createRoutine,
-    updateRoutine,
-    deleteRoutine,
-    addTask,
-    updateTask,
-    deleteTask,
-    installTemplate,
-  } = useRoutines(groupId);
+  const { routines, loading, error } = useRoutines(groupId);
 
   const [view, setView] = useState<View>({ mode: "list" });
   const router = useRouter();
+  const [, startTransition] = useTransition();
 
-  // Re-run the home Server Component so Inicio reflects routine/task edits
-  // without a manual page reload (page.tsx fetches tasks server-side as props).
   function refreshHome() {
     router.refresh();
   }
 
-  // ── Handlers ────────────────────────────────────────────────
+  // ── Handlers — all mutations go through server actions ────
 
   async function handleCreateRoutine(name: string, description: string) {
-    await createRoutine(name, description || undefined);
-    refreshHome();
-    setView({ mode: "list" });
-  }
-
-  async function handleUpdateRoutine(name: string, description: string) {
-    if (view.mode !== "edit") return;
-    await updateRoutine(view.routine.id, { name, description: description || null });
-    refreshHome();
-    setView({ mode: "list" });
-  }
-
-  async function handleDeleteRoutine(id: string) {
-    await deleteRoutine(id);
-    refreshHome();
-    if (view.mode === "edit" && view.routine.id === id) {
+    const result = await actions.createRoutineAction(groupId, name, description || undefined);
+    if (result.ok) {
+      refreshHome();
       setView({ mode: "list" });
     }
   }
 
+  async function handleUpdateRoutine(name: string, description: string) {
+    if (view.mode !== "edit") return;
+    const result = await actions.updateRoutineAction(view.routine.id, {
+      name,
+      description: description || null,
+    });
+    if (result.ok) {
+      refreshHome();
+      setView({ mode: "list" });
+    }
+  }
+
+  async function handleDeleteRoutine(id: string) {
+    const result = await actions.deleteRoutineAction(id);
+    if (result.ok) {
+      refreshHome();
+      if (view.mode === "edit" && view.routine.id === id) {
+        setView({ mode: "list" });
+      }
+    }
+  }
+
   async function handleAddTask(routineId: string, input: TaskInput) {
-    await addTask(routineId, input);
-    refreshHome();
-    // Refresh the routine in edit view if it matches
-    if (view.mode === "edit" && view.routine.id === routineId) {
-      const updated = routines.find((r) => r.id === routineId);
-      if (updated) setView({ mode: "edit", routine: updated });
+    const result = await actions.addTaskAction(routineId, input);
+    if (result.ok) {
+      refreshHome();
+      if (view.mode === "edit" && view.routine.id === routineId) {
+        const updated = routines.find((r) => r.id === routineId);
+        if (updated) setView({ mode: "edit", routine: updated });
+      }
     }
   }
 
   async function handleUpdateTask(taskId: string, input: TaskInput) {
-    await updateTask(taskId, input);
-    refreshHome();
+    const result = await actions.updateTaskAction(taskId, input);
+    if (result.ok) refreshHome();
   }
 
   async function handleDeleteTask(taskId: string) {
-    await deleteTask(taskId);
-    refreshHome();
+    const result = await actions.deleteTaskAction(taskId);
+    if (result.ok) refreshHome();
   }
 
   async function handleMoveTask(taskId: string, direction: "up" | "down") {
@@ -98,19 +100,20 @@ export default function RoutineBuilder({ groupId }: Props) {
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
     if (idx < 0 || swapIdx < 0 || swapIdx >= ordered.length) return;
     [ordered[idx], ordered[swapIdx]] = [ordered[swapIdx], ordered[idx]];
-    // Reassign sequential positions; persist only the ones that changed.
     for (let i = 0; i < ordered.length; i++) {
       if (ordered[i].position !== i) {
-        await updateTask(ordered[i].id, { position: i });
+        await actions.updateTaskAction(ordered[i].id, { position: i });
       }
     }
     refreshHome();
   }
 
   async function handleInstallTemplate(template: RoutineTemplate) {
-    await installTemplate(template);
-    refreshHome();
-    setView({ mode: "list" });
+    const result = await actions.installTemplateAction(groupId, template);
+    if (result.ok) {
+      refreshHome();
+      setView({ mode: "list" });
+    }
   }
 
   // After refetch, sync the edit view with fresh routine data

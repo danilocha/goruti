@@ -1,0 +1,398 @@
+/* ── Asistente Chat Container ───────────────────────────── */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: calc(100dvh - 160px);
+  overflow: hidden;
+}
+
+/* ── Welcome ─────────────────────────────────────────────── */
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.welcomeAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-lime), #8bc34a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+}
+
+.welcomeTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.welcomeSub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0 0 32px;
+}
+
+/* ── Suggestion Chips ────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #333);
+  background: var(--bg-surface, #1e1e2e);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  background: rgba(196, 241, 53, 0.1);
+  border-color: var(--color-lime);
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+/* ── Messages ────────────────────────────────────────────── */
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.userMessage {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.assistantMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.userMessage .bubble {
+  background: var(--color-lime);
+  color: #1a1a2e;
+  border-bottom-right-radius: 4px;
+}
+
+.assistantMessage .bubble {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+/* ── Typing Indicator ────────────────────────────────────── */
+
+.typing {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  align-items: center;
+}
+
+.typingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typingDot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typingDot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+/* ── Input Form ──────────────────────────────────────────── */
+
+.inputForm {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-color, #333);
+  background: var(--bg-primary);
+}
+
+.input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 24px;
+  border: 1px solid var(--border-color, #333);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--color-lime);
+}
+
+.input::placeholder {
+  color: var(--text-secondary);
+}
+
+.sendButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-lime);
+  color: #1a1a2e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.sendButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sendButton:not(:disabled):active {
+  transform: scale(0.9);
+}
+
+/* ── Tool Result Card ────────────────────────────────────── */
+
+.toolCard {
+  border: 1px solid var(--border-color, #333);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.toolOk {
+  border-left: 3px solid #4caf50;
+}
+
+.toolError {
+  border-left: 3px solid #f44336;
+}
+
+.toolCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+
+.toolCardLabel {
+  flex: 1;
+  font-weight: 600;
+}
+
+.statusIcon {
+  font-size: 18px;
+}
+
+.toolOk .statusIcon {
+  color: #4caf50;
+}
+
+.toolError .statusIcon {
+  color: #f44336;
+}
+
+.expandIcon {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.toolCardBody {
+  padding: 0 12px 12px;
+  border-top: 1px solid var(--border-color, #333);
+}
+
+.toolSection {
+  margin-top: 8px;
+}
+
+.toolSection strong {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.toolSection pre {
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* ── Spinner (streaming) ─────────────────────────────────── */
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--color-lime);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Destructive Confirmation ────────────────────────────── */
+
+.confirmOverlay {
+  padding: 8px 0;
+}
+
+.confirmCard {
+  background: rgba(244, 67, 54, 0.08);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.confirmIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: #f44336;
+  font-size: 32px;
+}
+
+.confirmText {
+  font-size: 14px;
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+
+.confirmSubtext {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0 0 16px;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.confirmCancel {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #333);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.confirmDelete {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #f44336;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.confirmDelete:hover {
+  background: #d32f2f;
+}
+
+.confirmCancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Error Bar ───────────────────────────────────────────── */
+
+.errorBar {
+  position: absolute;
+  bottom: 80px;
+  left: 16px;
+  right: 16px;
+  padding: 10px 14px;
+  background: rgba(244, 67, 54, 0.9);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  z-index: 10;
+}

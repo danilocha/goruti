@@ -73,6 +73,17 @@ export interface GroupWithMembers extends Group {
   members: Array<{ userId: string; role: "owner" | "member"; displayName: string | null }>;
 }
 
+export interface TaskInput {
+  name: string;
+  icon?: string | null;
+  block?: string | null;
+  timeLabel?: string | null;
+  note?: string | null;
+  noCheck?: boolean;
+  schedule: TaskSchedule;
+  position?: number;
+}
+
 export interface Completion {
   id: string;
   routineId: string;

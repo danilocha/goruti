@@ -2,7 +2,7 @@
 
 import styles from "./BottomNav.module.css";
 
-export type TabId = "home" | "progress" | "rutinas" | "settings";
+export type TabId = "home" | "progress" | "rutinas" | "settings" | "asistente";
 
 interface Props {
   activeTab: TabId;
@@ -20,6 +20,7 @@ const TABS: TabDef[] = [
   { id: "progress", label: "Progreso", icon: "analytics" },
   { id: "rutinas", label: "Rutinas", icon: "edit_note" },
   { id: "settings", label: "Ajustes", icon: "settings" },
+  { id: "asistente", label: "Asistente", icon: "auto_awesome" },
 ];
 
 /**

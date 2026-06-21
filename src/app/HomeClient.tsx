@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { PAL, PAL_DARK, DAYS } from "@/data/constants";
 import { useTheme } from "@/hooks/useTheme";
@@ -16,6 +16,7 @@ import type { TabId } from "@/components/BottomNav";
 import SettingsPanel from "@/components/SettingsPanel";
 import RoutineBuilder from "@/components/routines/RoutineBuilder";
 import WeeklyProgress from "@/components/WeeklyProgress";
+import Asistente from "@/components/Asistente";
 import { useChecklist } from "@/hooks/useChecklist";
 import { useCompletions } from "@/hooks/useCompletions";
 import styles from "./page.module.css";
@@ -52,6 +53,7 @@ export default function HomeClient({
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [selectedDay, setSelectedDay] = useState<DayName>(initialDayName);
+  const [chatSessionId, setChatSessionId] = useState<string | undefined>(undefined);
 
   const { blocks, checkable, total } = useChecklist(tasks, selectedDay);
   const taskIds = tasks.map((t) => t.id);
@@ -180,6 +182,12 @@ export default function HomeClient({
         {activeTab === "rutinas" && <RoutineBuilder groupId={groupId} />}
 
         {activeTab === "settings" && <SettingsPanel groupId={groupId} />}
+
+        {activeTab === "asistente" && (
+          <main className={styles.main}>
+            <Asistente sessionId={chatSessionId} />
+          </main>
+        )}
       </div>
 
       {failedTaskId && (

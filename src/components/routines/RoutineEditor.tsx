@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { RoutineTask } from "@/data/types";
-import type { RoutineWithTasks, TaskInput } from "@/hooks/useRoutines";
+import type { RoutineWithTasks } from "@/hooks/useRoutines";
+import type { TaskInput } from "@/data/types";
 import TaskEditor from "./TaskEditor";
 import styles from "./RoutineEditor.module.css";
 

@@ -1,5 +1,5 @@
 import type { DayName, TaskSchedule } from "./types";
-import type { TaskInput } from "@/hooks/useRoutines";
+import type { TaskInput } from "@/data/types";
 
 // ── Template types ────────────────────────────────────────────────────
 
