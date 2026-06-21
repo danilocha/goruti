@@ -29,3 +29,18 @@ Thumbs.db
 
 # SDD artifacts (optional — uncomment to exclude)
 # openspec/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Dev server logs
+dev-server.log
+dev-server-err.log
+
+# Local agent/editor tooling
+.claude/
+.agents/
+
+# Stray redirect artifact
+/-
