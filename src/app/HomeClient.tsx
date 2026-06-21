@@ -15,6 +15,7 @@ import BottomNav from "@/components/BottomNav";
 import type { TabId } from "@/components/BottomNav";
 import SettingsPanel from "@/components/SettingsPanel";
 import RoutineBuilder from "@/components/routines/RoutineBuilder";
+import WeeklyProgress from "@/components/WeeklyProgress";
 import { useChecklist } from "@/hooks/useChecklist";
 import { useCompletions } from "@/hooks/useCompletions";
 import styles from "./page.module.css";
@@ -172,10 +173,7 @@ export default function HomeClient({
 
         {activeTab === "progress" && (
           <main className={styles.main}>
-            <div className={styles.placeholder}>
-              <h2>Progreso Semanal</h2>
-              <p>Próximamente</p>
-            </div>
+            <WeeklyProgress groupId={groupId} currentUserId={currentUserId} />
           </main>
         )}
 
