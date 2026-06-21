@@ -160,6 +160,9 @@ describe("useAuth", () => {
       expect(mockSignUp).toHaveBeenCalledWith({
         email: "a@b.com",
         password: "pass",
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
     });
   });
