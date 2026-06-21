@@ -281,7 +281,11 @@ export function useRoutines(groupId: string): UseRoutinesResult {
           group_id: groupId,
           name: template.name,
           description: template.description,
-          template_id: template.id,
+          // template_id stays null for user installs: the unique
+          // (group_id, template_id) is only for seed idempotency, and null
+          // lets the same template be installed more than once as separate
+          // editable copies (no unique-violation error on re-install).
+          template_id: null,
         })
         .select("id")
         .single();
