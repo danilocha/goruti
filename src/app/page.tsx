@@ -17,6 +17,7 @@ import { getActiveGroupId } from "@/lib/routines/activeGroup";
 import { seedDefaultRoutine } from "@/lib/routines/seedDefaultRoutine";
 import { fetchDayData } from "@/lib/routines/fetchDayData";
 import { fetchGroupMembers } from "@/lib/routines/fetchGroupMembers";
+import { getLatestChatSession } from "@/lib/agent/getLatestChatSession";
 import HomeClient from "./HomeClient";
 import type { DayName } from "@/data/types";
 
@@ -61,6 +62,8 @@ export default async function Home() {
 
   const { tasks, completions } = await fetchDayData(groupId, todayDate, dayName);
   const members = await fetchGroupMembers(groupId);
+  // Load the persisted assistant conversation (if any) so it survives reloads.
+  const chatSession = await getLatestChatSession();
 
   return (
     <HomeClient
@@ -71,6 +74,8 @@ export default async function Home() {
       groupId={groupId}
       members={members}
       currentUserId={user.id}
+      chatSessionId={chatSession?.id}
+      chatInitialMessages={chatSession?.messages ?? []}
     />
   );
 }

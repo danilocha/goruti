@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { PAL, PAL_DARK, DAYS } from "@/data/constants";
 import { useTheme } from "@/hooks/useTheme";
+import type { UIMessage } from "ai";
 import type { DayName, RoutineTask, Completion } from "@/data/types";
 import type { GroupMemberInfo } from "@/lib/routines/fetchGroupMembers";
 import { memberStatusForTask } from "@/data/completionStatus";
@@ -29,6 +30,8 @@ interface Props {
   groupId: string;
   members: GroupMemberInfo[];
   currentUserId: string;
+  chatSessionId?: string;
+  chatInitialMessages?: UIMessage[];
 }
 
 /**
@@ -50,10 +53,11 @@ export default function HomeClient({
   groupId,
   members,
   currentUserId,
+  chatSessionId,
+  chatInitialMessages,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [selectedDay, setSelectedDay] = useState<DayName>(initialDayName);
-  const [chatSessionId, setChatSessionId] = useState<string | undefined>(undefined);
 
   const { blocks, checkable, total } = useChecklist(tasks, selectedDay);
   const taskIds = tasks.map((t) => t.id);
@@ -185,7 +189,10 @@ export default function HomeClient({
 
         {activeTab === "asistente" && (
           <main className={styles.main}>
-            <Asistente sessionId={chatSessionId} />
+            <Asistente
+              sessionId={chatSessionId}
+              initialMessages={chatInitialMessages}
+            />
           </main>
         )}
       </div>

@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import type { UIMessage } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import Welcome from "./Welcome";
 import ToolResultCard from "./ToolResultCard";
 import DestructiveToolConfirmation from "./DestructiveToolConfirmation";
@@ -12,6 +11,7 @@ import styles from "./Asistente.module.css";
 
 interface Props {
   sessionId?: string;
+  initialMessages?: UIMessage[];
 }
 
 const MUTATION_TOOLS = new Set([
@@ -48,7 +48,7 @@ function isToolInvocationPart(part: unknown): part is ToolInvocationPart {
  *
  * Uses useChat() from @ai-sdk/react to manage conversation state.
  */
-export default function Asistente({ sessionId }: Props) {
+export default function Asistente({ sessionId, initialMessages }: Props) {
   const router = useRouter();
   const refreshDoneRef = useRef(false);
   const [input, setInput] = useState("");
@@ -66,7 +66,7 @@ export default function Asistente({ sessionId }: Props) {
     [chatId],
   );
 
-  const chat = useChat({ id: chatId, transport });
+  const chat = useChat({ id: chatId, transport, messages: initialMessages });
 
   const { messages, status, error, addToolOutput } = chat;
 
@@ -110,8 +110,10 @@ export default function Asistente({ sessionId }: Props) {
         <Welcome onSuggestionClick={handleSuggestionClick} />
       ) : (
         <div className={styles.messages}>
-          {messages.map((msg) => (
-            <div key={msg.id}>
+          {messages.map((msg, msgIdx) => (
+            // Composite key: persisted/rehydrated messages can share an id,
+            // so combine it with the index to keep keys unique.
+            <div key={`${msg.id}-${msgIdx}`}>
               {msg.role === "user" && (
                 <div className={styles.userMessage}>
                   <div className={styles.bubble}>{getMessageContent(msg)}</div>
