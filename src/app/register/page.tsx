@@ -28,6 +28,8 @@ export default function RegisterPage() {
 
     if (!password.trim()) {
       errors.password = "La contraseña es obligatoria";
+    } else if (password.length < 6) {
+      errors.password = "La contraseña debe tener al menos 6 caracteres";
     }
 
     setFieldErrors(errors);
@@ -56,18 +58,8 @@ export default function RegisterPage() {
 
     const { error } = await signup(email, password);
     if (error) {
-      // Handle duplicate email gracefully
-      if (
-        error.toLowerCase().includes("already registered") ||
-        error.toLowerCase().includes("duplicate") ||
-        error.toLowerCase().includes("already exists")
-      ) {
-        setError(
-          "Este correo electrónico ya está registrado. Prueba con otro o inicia sesión."
-        );
-      } else {
-        setError(error);
-      }
+      // `error` is already localized by translateAuthError (via useAuth).
+      setError(error);
       triggerShake();
       setIsSubmitting(false);
     } else {
@@ -84,7 +76,7 @@ export default function RegisterPage() {
 
         <h1 className={styles.heading}>Crear cuenta</h1>
 
-        <form onSubmit={handleSubmit} className={styles.form} ref={formRef}>
+        <form onSubmit={handleSubmit} className={styles.form} ref={formRef} noValidate>
           <div>
             <label htmlFor="email" className={styles.label}>
               Correo electrónico

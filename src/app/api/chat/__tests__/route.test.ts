@@ -4,18 +4,30 @@ import type { NextRequest } from "next/server";
 // ── Hoisted mocks ───────────────────────────────────────────
 
 const mockStreamText = vi.hoisted(() => vi.fn());
+const mockConvert = vi.hoisted(() =>
+  vi.fn(async (msgs: unknown[]) => msgs),
+);
 
 vi.mock("ai", () => ({
   streamText: mockStreamText,
-  stepCountIs: vi.fn((n: number) => () => false),
-  tool: vi.fn((def: { description: string; parameters: unknown; execute?: unknown }) => def),
-  userModelMessageSchema: {
-    parse: vi.fn((x: unknown) => x),
-  },
+  stepCountIs: vi.fn(() => () => false),
+  convertToModelMessages: mockConvert,
+  tool: vi.fn(
+    (def: { description: string; parameters: unknown; execute?: unknown }) =>
+      def,
+  ),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
+}));
+
+vi.mock("@/lib/routines/ensurePersonalGroup", () => ({
+  ensurePersonalGroup: vi.fn().mockResolvedValue("personal-1"),
+}));
+
+vi.mock("@/lib/routines/activeGroup", () => ({
+  getActiveGroupId: vi.fn().mockResolvedValue("group-1"),
 }));
 
 vi.mock("@/lib/operations/routines", () => ({
@@ -34,13 +46,18 @@ vi.mock("@ai-sdk/google", () => ({
 // Import AFTER mocks
 import { POST } from "../route";
 import { createClient } from "@/lib/supabase/server";
-import * as ops from "@/lib/operations/routines";
 
 // ── Fixtures ────────────────────────────────────────────────
 
+const SAMPLE_MESSAGES = [
+  { id: "m1", role: "user", parts: [{ type: "text", text: "Hola" }] },
+];
+
 function makeNextRequest(body: Record<string, unknown> = {}): NextRequest {
   return {
-    json: vi.fn().mockResolvedValue({ id: "session-1", message: "Hola", ...body }),
+    json: vi
+      .fn()
+      .mockResolvedValue({ id: "session-1", messages: SAMPLE_MESSAGES, ...body }),
   } as unknown as NextRequest;
 }
 
@@ -63,11 +80,30 @@ function makeAuthClient(userId: string | null) {
   };
 }
 
+/** Default streamText mock returning a UI message stream response. */
+function mockUiStream(
+  onFinishRef?: {
+    current?: (args: { messages: unknown[] }) => Promise<void>;
+  },
+) {
+  mockStreamText.mockReturnValue({
+    toUIMessageStreamResponse: vi.fn(
+      (opts?: { onFinish?: (args: { messages: unknown[] }) => Promise<void> }) => {
+        if (onFinishRef) onFinishRef.current = opts?.onFinish;
+        return new Response("stream", {
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      },
+    ),
+  });
+}
+
 // ── Tests ───────────────────────────────────────────────────
 
 describe("POST /api/chat", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockConvert.mockImplementation(async (msgs: unknown[]) => msgs);
   });
 
   it("returns 401 when user is not authenticated", async () => {
@@ -81,11 +117,14 @@ describe("POST /api/chat", () => {
     expect(mockStreamText).not.toHaveBeenCalled();
   });
 
-  it("returns 400 when message is missing", async () => {
+  it("returns 400 when messages are missing or empty", async () => {
     vi.mocked(createClient).mockResolvedValue(makeAuthClient("user-1") as never);
 
-    const response = await POST(makeNextRequest({ message: undefined }));
-    expect(response.status).toBe(400);
+    const missing = await POST(makeNextRequest({ messages: undefined }));
+    expect(missing.status).toBe(400);
+
+    const empty = await POST(makeNextRequest({ messages: [] }));
+    expect(empty.status).toBe(400);
   });
 
   it("returns 503 when AI service is unavailable", async () => {
@@ -102,31 +141,18 @@ describe("POST /api/chat", () => {
     expect(body.error).toBeDefined();
   });
 
-  it("returns streaming response on success", async () => {
+  it("returns a streaming response on success", async () => {
     vi.mocked(createClient).mockResolvedValue(makeAuthClient("user-1") as never);
-
-    const mockResponse = new Response("data: test\n\n", {
-      headers: { "Content-Type": "text/event-stream" },
-    });
-    mockStreamText.mockReturnValue({
-      toTextStreamResponse: vi.fn().mockReturnValue(mockResponse),
-    });
+    mockUiStream();
 
     const response = await POST(makeNextRequest());
     expect(response.status).toBe(200);
     expect(mockStreamText).toHaveBeenCalledOnce();
   });
 
-  it("injects system prompt with group context", async () => {
+  it("injects the system prompt", async () => {
     vi.mocked(createClient).mockResolvedValue(makeAuthClient("user-1") as never);
-    vi.mocked(ops.listRoutines).mockResolvedValue({ ok: true, data: [] });
-
-    const mockResponse = new Response("data: test\n\n", {
-      headers: { "Content-Type": "text/event-stream" },
-    });
-    mockStreamText.mockReturnValue({
-      toTextStreamResponse: vi.fn().mockReturnValue(mockResponse),
-    });
+    mockUiStream();
 
     await POST(makeNextRequest());
 
@@ -136,44 +162,18 @@ describe("POST /api/chat", () => {
     expect(callArgs.system).toContain("asistente");
   });
 
-  it("injects history from chat_sessions", async () => {
-    const client = makeAuthClient("user-1");
-    const mockMaybeSingle = vi.fn().mockResolvedValue({
-      data: {
-        id: "session-1",
-        messages: [
-          { role: "user", content: "Hola" },
-          { role: "assistant", content: "Hola! En qué puedo ayudarte?" },
-        ],
-      },
-      error: null,
-    });
-    client.from = vi.fn(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: mockMaybeSingle,
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      upsert: vi.fn().mockResolvedValue({ error: null }),
-    }));
-
-    vi.mocked(createClient).mockResolvedValue(client as never);
-
-    const mockResponse = new Response("data: test\n\n", {
-      headers: { "Content-Type": "text/event-stream" },
-    });
-    mockStreamText.mockReturnValue({
-      toTextStreamResponse: vi.fn().mockReturnValue(mockResponse),
-    });
+  it("converts the incoming UI messages to model messages", async () => {
+    vi.mocked(createClient).mockResolvedValue(makeAuthClient("user-1") as never);
+    mockUiStream();
 
     await POST(makeNextRequest());
 
-    expect(mockStreamText).toHaveBeenCalled();
+    expect(mockConvert).toHaveBeenCalledWith(SAMPLE_MESSAGES);
     const callArgs = mockStreamText.mock.calls[0][0];
-    expect(callArgs.messages).toHaveLength(3); // 2 existing + 1 new
+    expect(callArgs.messages).toEqual(SAMPLE_MESSAGES);
   });
 
-  it("saves session on finish", async () => {
+  it("persists the transcript on finish", async () => {
     const mockUpsert = vi.fn().mockResolvedValue({ error: null });
     const client = makeAuthClient("user-1");
     client.from = vi.fn(() => ({
@@ -187,19 +187,20 @@ describe("POST /api/chat", () => {
 
     vi.mocked(createClient).mockResolvedValue(client as never);
 
-    const onFinishCallback: { current: ((args: { response: { messages: unknown[] } }) => Promise<void>) | undefined } = { current: undefined };
-
-    mockStreamText.mockImplementation((opts: { onFinish: (args: { response: { messages: unknown[] } }) => Promise<void> }) => {
-      onFinishCallback.current = opts.onFinish;
-      return {
-        toTextStreamResponse: vi.fn().mockReturnValue(new Response()),
-      };
-    });
+    const onFinishRef: {
+      current?: (args: { messages: unknown[] }) => Promise<void>;
+    } = {};
+    mockUiStream(onFinishRef);
 
     await POST(makeNextRequest());
 
-    expect(onFinishCallback.current).not.toBeUndefined();
-    await onFinishCallback.current!({ response: { messages: [{ role: "assistant", content: "Respuesta" }] } });
+    expect(onFinishRef.current).toBeDefined();
+    await onFinishRef.current!({
+      messages: [
+        { id: "m1", role: "user", parts: [{ type: "text", text: "Hola" }] },
+        { id: "m2", role: "assistant", parts: [{ type: "text", text: "¡Hola!" }] },
+      ],
+    });
 
     expect(mockUpsert).toHaveBeenCalled();
   });

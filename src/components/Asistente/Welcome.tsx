@@ -6,9 +6,9 @@ interface Props {
 }
 
 const SUGGESTIONS = [
-  "Mostrame mis rutinas",
-  "Creá una rutina nueva",
-  "Agregá una tarea a mi rutina",
+  "Muéstrame mis rutinas",
+  "Crea una rutina nueva",
+  "Agrega una tarea a mi rutina",
   "¿Qué puedo hacer hoy?",
 ];
 

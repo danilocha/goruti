@@ -73,7 +73,7 @@ export default function LoginPage() {
 
         <h1 className={styles.heading}>Iniciar sesión</h1>
 
-        <form onSubmit={handleSubmit} className={styles.form} ref={formRef}>
+        <form onSubmit={handleSubmit} className={styles.form} ref={formRef} noValidate>
           <div>
             <label htmlFor="email" className={styles.label}>
               Correo electrónico

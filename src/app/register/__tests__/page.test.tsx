@@ -57,9 +57,12 @@ describe("RegisterPage", () => {
     });
   });
 
-  it("shows friendly error on duplicate email", async () => {
+  it("shows the (already-localized) error returned by useAuth", async () => {
+    // useAuth localizes Supabase errors via translateAuthError; the page
+    // just displays whatever string it receives.
     mockSignup.mockResolvedValue({
-      error: "User already registered",
+      error:
+        "Este correo electrónico ya está registrado. Prueba con otro o inicia sesión.",
     });
 
     render(<RegisterPage />);
@@ -70,22 +73,14 @@ describe("RegisterPage", () => {
     await user.click(screen.getByRole("button", { name: /crear cuenta/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          /ya está registrado/i
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByText(/ya está registrado/i)).toBeInTheDocument();
     });
 
     // Should NOT redirect
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("shows raw error on non-duplicate error", async () => {
-    mockSignup.mockResolvedValue({
-      error: "Password too weak",
-    });
-
+  it("rejects passwords shorter than 6 characters before calling signup", async () => {
     render(<RegisterPage />);
 
     const user = userEvent.setup();
@@ -94,8 +89,9 @@ describe("RegisterPage", () => {
     await user.click(screen.getByRole("button", { name: /crear cuenta/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("Password too weak")).toBeInTheDocument();
+      expect(screen.getByText(/al menos 6 caracteres/i)).toBeInTheDocument();
     });
+    expect(mockSignup).not.toHaveBeenCalled();
   });
 
   it("shows a link to the login page", () => {

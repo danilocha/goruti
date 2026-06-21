@@ -19,16 +19,16 @@ describe("Welcome", () => {
   it("calls onSuggestionClick when a chip is tapped", async () => {
     const onClick = vi.fn();
     render(<Welcome onSuggestionClick={onClick} />);
-    const chip = screen.getByText("Mostrame mis rutinas");
+    const chip = screen.getByText("Muéstrame mis rutinas");
     await userEvent.click(chip);
-    expect(onClick).toHaveBeenCalledWith("Mostrame mis rutinas");
+    expect(onClick).toHaveBeenCalledWith("Muéstrame mis rutinas");
   });
 
   it("renders all 4 suggestion texts", () => {
     render(<Welcome onSuggestionClick={vi.fn()} />);
-    expect(screen.getByText("Mostrame mis rutinas")).toBeInTheDocument();
-    expect(screen.getByText("Creá una rutina nueva")).toBeInTheDocument();
-    expect(screen.getByText("Agregá una tarea a mi rutina")).toBeInTheDocument();
+    expect(screen.getByText("Muéstrame mis rutinas")).toBeInTheDocument();
+    expect(screen.getByText("Crea una rutina nueva")).toBeInTheDocument();
+    expect(screen.getByText("Agrega una tarea a mi rutina")).toBeInTheDocument();
     expect(screen.getByText("¿Qué puedo hacer hoy?")).toBeInTheDocument();
   });
 });

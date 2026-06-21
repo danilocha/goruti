@@ -81,16 +81,18 @@ const deleteTaskSchema = z.object({
 
 function createTool<T extends Record<string, unknown>>(
   description: string,
-  parameters: z.ZodObject<z.ZodRawShape>,
+  inputSchema: z.ZodObject<z.ZodRawShape>,
   execute?: (args: T) => unknown,
 ) {
+  // AI SDK v6 tools use `inputSchema` (not `parameters`); using the wrong key
+  // means the model never receives the tool's argument schema.
   const def: {
     description: string;
-    parameters: z.ZodObject<z.ZodRawShape>;
+    inputSchema: z.ZodObject<z.ZodRawShape>;
     execute?: (args: T) => unknown;
   } = {
     description,
-    parameters,
+    inputSchema,
   };
   if (execute) def.execute = execute;
   return def as unknown as ReturnType<typeof tool>;

@@ -46,7 +46,7 @@ function exec(t: unknown, args: Record<string, unknown>) {
 }
 
 function toolParams(t: unknown) {
-  return (t as { parameters: { safeParse: (d: unknown) => { success: boolean } } }).parameters;
+  return (t as { inputSchema: { safeParse: (d: unknown) => { success: boolean } } }).inputSchema;
 }
 
 // ── Fixtures ────────────────────────────────────────────────

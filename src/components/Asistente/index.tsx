@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -53,13 +53,20 @@ export default function Asistente({ sessionId }: Props) {
   const refreshDoneRef = useRef(false);
   const [input, setInput] = useState("");
 
-  const chat = useChat({
-    id: sessionId,
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      body: { id: sessionId },
-    }),
-  });
+  // Stable chat id for the lifetime of this component. A new id (or a new
+  // transport instance) on every render makes useChat recreate its internal
+  // Chat and wipe the message list, so both must be memoized.
+  const chatId = useMemo(() => sessionId ?? crypto.randomUUID(), [sessionId]);
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: { id: chatId },
+      }),
+    [chatId],
+  );
+
+  const chat = useChat({ id: chatId, transport });
 
   const { messages, status, error, addToolOutput } = chat;
 
@@ -185,7 +192,7 @@ export default function Asistente({ sessionId }: Props) {
           className={styles.input}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribí un mensaje…"
+          placeholder="Escribe un mensaje…"
           disabled={status === "streaming"}
           aria-label="Mensaje para el asistente"
         />

@@ -12,6 +12,8 @@ export interface UseRoutinesResult {
   routines: RoutineWithTasks[];
   loading: boolean;
   error: string | null;
+  /** Re-fetch routines + tasks from the DB. Call after a mutation. */
+  refetch: () => Promise<void>;
 }
 
 // ── DB row → camelCase mappers ─────────────────────────────────────
@@ -138,5 +140,6 @@ export function useRoutines(groupId: string): UseRoutinesResult {
     routines,
     loading,
     error,
+    refetch: fetchAll,
   };
 }

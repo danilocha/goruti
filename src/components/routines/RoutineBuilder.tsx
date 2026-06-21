@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRoutines } from "@/hooks/useRoutines";
 import type { RoutineWithTasks } from "@/hooks/useRoutines";
@@ -29,13 +29,16 @@ type View =
  * Uses router.refresh() after mutations to re-render the Home Server Component.
  */
 export default function RoutineBuilder({ groupId }: Props) {
-  const { routines, loading, error } = useRoutines(groupId);
+  const { routines, loading, error, refetch } = useRoutines(groupId);
 
   const [view, setView] = useState<View>({ mode: "list" });
   const router = useRouter();
-  const [, startTransition] = useTransition();
 
-  function refreshHome() {
+  // Re-fetch the client-side routines list AND re-render the Home Server
+  // Component. router.refresh() alone does NOT invalidate the useRoutines
+  // client state, so the Rutinas list/editor would otherwise stay stale.
+  async function refreshHome() {
+    await refetch();
     router.refresh();
   }
 
@@ -73,13 +76,9 @@ export default function RoutineBuilder({ groupId }: Props) {
 
   async function handleAddTask(routineId: string, input: TaskInput) {
     const result = await actions.addTaskAction(routineId, input);
-    if (result.ok) {
-      refreshHome();
-      if (view.mode === "edit" && view.routine.id === routineId) {
-        const updated = routines.find((r) => r.id === routineId);
-        if (updated) setView({ mode: "edit", routine: updated });
-      }
-    }
+    // The edit view re-syncs automatically via `currentRoutine` once the
+    // refetch updates the routines list.
+    if (result.ok) await refreshHome();
   }
 
   async function handleUpdateTask(taskId: string, input: TaskInput) {

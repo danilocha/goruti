@@ -98,7 +98,7 @@ export default function SettingsPanel({ groupId }: Props) {
         <h2 className={styles.sectionTitle}>Apariencia</h2>
         <div className={styles.card}>
           <div className={styles.row}>
-            <span className={styles.label}>Modo oscuro</span>
+            <span className={styles.label}>Tema</span>
             <span className={styles.toggleValue}>
               {isDark ? "Modo oscuro" : "Modo claro"}
             </span>

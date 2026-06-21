@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { translateAuthError } from "@/lib/auth/authErrors";
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -81,7 +82,7 @@ export function AuthProvider({
         email,
         password,
       });
-      return { error: error?.message ?? null };
+      return { error: error ? translateAuthError(error.message) : null };
     },
     [supabase.auth]
   );
@@ -95,7 +96,7 @@ export function AuthProvider({
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      return { error: error?.message ?? null };
+      return { error: error ? translateAuthError(error.message) : null };
     },
     [supabase.auth]
   );
