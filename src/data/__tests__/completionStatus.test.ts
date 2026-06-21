@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildCompletionMap,
   memberStatusForTask,
+  applyCompletionEvent,
 } from "../completionStatus";
 import type { Completion } from "../types";
 
@@ -104,5 +105,56 @@ describe("memberStatusForTask", () => {
     const completedUserIds = new Set(["user-a", "user-b"]);
     const result = memberStatusForTask("task-1", members, completedUserIds);
     expect(result.every((r) => r.done)).toBe(true);
+  });
+});
+
+// ── applyCompletionEvent ──────────────────────────────────────────────────────
+
+describe("applyCompletionEvent", () => {
+  const base: Completion = {
+    id: "comp-1",
+    routineId: "routine-1",
+    taskId: "task-1",
+    userId: "user-b",
+    completedDate: "2026-06-20",
+    completedAt: "2026-06-20T08:00:00Z",
+  };
+
+  it("INSERT: adds a new completion to the array", () => {
+    const result = applyCompletionEvent([], { kind: "INSERT", row: base });
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(base);
+  });
+
+  it("INSERT: is a no-op when a completion with the same id already exists (dedupe)", () => {
+    const existing = [base];
+    const result = applyCompletionEvent(existing, { kind: "INSERT", row: base });
+    expect(result).toHaveLength(1);
+  });
+
+  it("DELETE: removes the completion whose id matches event.row.id", () => {
+    const existing = [base, { ...base, id: "comp-2", taskId: "task-2" }];
+    const result = applyCompletionEvent(existing, { kind: "DELETE", row: base });
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("comp-2");
+  });
+
+  it("DELETE: is a no-op when no completion matches event.row.id", () => {
+    const existing = [base];
+    const ghost: Completion = { ...base, id: "ghost-id" };
+    const result = applyCompletionEvent(existing, { kind: "DELETE", row: ghost });
+    expect(result).toHaveLength(1);
+  });
+
+  it("INSERT: returns a new array reference (pure function)", () => {
+    const existing: Completion[] = [];
+    const result = applyCompletionEvent(existing, { kind: "INSERT", row: base });
+    expect(result).not.toBe(existing);
+  });
+
+  it("DELETE: returns a new array reference (pure function)", () => {
+    const existing = [base];
+    const result = applyCompletionEvent(existing, { kind: "DELETE", row: base });
+    expect(result).not.toBe(existing);
   });
 });

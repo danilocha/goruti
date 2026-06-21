@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Completion } from "@/data/types";
-import { buildCompletionMap } from "@/data/completionStatus";
+import { buildCompletionMap, applyCompletionEvent } from "@/data/completionStatus";
 
 /**
- * useCompletions — optimistic completion toggle backed by Supabase.
+ * useCompletions — optimistic completion toggle backed by Supabase, with
+ * realtime updates for other group members via Supabase Realtime.
+ *
+ * Security: realtime relies on RLS — the client only receives postgres_changes
+ * events for rows it can SELECT (its own group). See the publication migration
+ * `supabase/migrations/20260621010000_realtime_completions.sql`.
  *
  * Signature: useCompletions(tasks, date, initial, currentUserId)
  *   tasks: { id, routineId }[] — needed because task_completions.routine_id is
@@ -14,9 +19,9 @@ import { buildCompletionMap } from "@/data/completionStatus";
  *   currentUserId: the authenticated user's id (passed from server component).
  *
  * - `checked` is initialised ONLY from MY completions (filtered by currentUserId).
+ * - `otherCompletions` is live state updated via realtime subscription.
  * - `completedUserIds(taskId)`: returns the full set of userIds done for that task —
- *   combining static snapshot of OTHER members' completions (from page load) with
- *   MY current optimistic state. Others are a snapshot; realtime is future work.
+ *   combining live snapshot of OTHER members' completions with MY current optimistic state.
  * - toggle(taskId): optimistic update → upsert or delete → rollback on error.
  * - isChecked(taskId): returns true if THE CURRENT USER completed the task.
  *
@@ -40,13 +45,74 @@ export function useCompletions(
     () => new Set(myCompletions.map((c) => c.taskId)),
   );
 
-  // Static snapshot of OTHER members' completions (used to show their status in shared groups).
-  // NOTE: others' completions are not updated in realtime — realtime is future work.
-  const othersMap = buildCompletionMap(
-    currentUserId ? initial.filter((c) => c.userId !== currentUserId) : [],
+  // Live state for OTHER members' completions — updated via realtime subscription.
+  const [otherCompletions, setOtherCompletions] = useState<Completion[]>(
+    () => (currentUserId ? initial.filter((c) => c.userId !== currentUserId) : []),
+  );
+
+  // Derive the map from live state each render (cheap, avoids stale closures).
+  const othersMap = useMemo(
+    () => buildCompletionMap(otherCompletions),
+    [otherCompletions],
   );
 
   const [failedTaskId, setFailedTaskId] = useState<string | null>(null);
+
+  // Stable key for task ids to use as useEffect dependency.
+  const taskIdsKey = tasks.map((t) => t.id).join(",");
+
+  // Realtime subscription — re-subscribes when date, currentUserId, or task list changes.
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const taskIdSet = new Set(tasks.map((t) => t.id));
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel(`realtime-completions-${date}-${currentUserId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "task_completions" },
+        (payload) => {
+          // Map snake_case DB columns → Completion type.
+          // For DELETE, Supabase only sends the PK in `old_record`; we use that.
+          const raw =
+            payload.eventType === "DELETE"
+              ? (payload.old as Record<string, unknown>)
+              : (payload.new as Record<string, unknown>);
+
+          const row: Completion = {
+            id: raw["id"] as string,
+            routineId: raw["routine_id"] as string,
+            taskId: raw["task_id"] as string,
+            userId: raw["user_id"] as string,
+            completedDate: raw["completed_date"] as string,
+            completedAt: raw["completed_at"] as string,
+          };
+
+          // Ignore own events — my state is managed optimistically.
+          if (row.userId === currentUserId) return;
+          // Ignore events for tasks not in the current view or the wrong date.
+          if (!taskIdSet.has(row.taskId)) return;
+          if (row.completedDate !== date) return;
+
+          const kind =
+            payload.eventType === "DELETE"
+              ? "DELETE"
+              : "INSERT"; // treat UPDATE as upsert (INSERT path dedupes by id)
+
+          setOtherCompletions((prev) =>
+            applyCompletionEvent(prev, { kind, row }),
+          );
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, currentUserId, taskIdsKey]);
 
   const toggle = useCallback(
     async (taskId: string) => {
@@ -124,8 +190,9 @@ export function useCompletions(
 
   /**
    * completedUserIds(taskId) — returns the full set of userIds who completed
-   * this task: static snapshot of others' completions merged with my current
-   * optimistic state. Used to drive per-member status badges in shared groups.
+   * this task: live snapshot of others' completions (via realtime) merged with
+   * my current optimistic state. Used to drive per-member status badges in
+   * shared groups.
    */
   const completedUserIds = useCallback(
     (taskId: string): Set<string> => {

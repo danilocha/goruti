@@ -25,6 +25,14 @@ function makeQueryMock(terminalFn: () => Promise<{ error: null | { message: stri
 
 const mockFrom = vi.fn();
 
+// Minimal channel stub so useEffect realtime subscription does not crash.
+const mockChannelSubscribe = vi.fn().mockReturnValue({});
+const mockChannelOn = vi.fn();
+const mockChannel = vi.fn(() => ({
+  on: (..._args: unknown[]) => ({ subscribe: mockChannelSubscribe }),
+}));
+const mockRemoveChannel = vi.fn();
+
 vi.mock("@/lib/supabase/client", () => ({
   createClient: vi.fn(() => ({
     from: mockFrom,
@@ -33,6 +41,8 @@ vi.mock("@/lib/supabase/client", () => ({
         data: { user: { id: "user-123" } },
       }),
     },
+    channel: mockChannel,
+    removeChannel: mockRemoveChannel,
   })),
 }));
 
