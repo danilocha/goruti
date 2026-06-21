@@ -1,69 +1,57 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
-import type { CheckState, ChecklistAction, Task } from "@/data/types";
-import { useChecklist } from "@/hooks/useChecklist";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useEffect, type ReactNode } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import type { Session } from "@supabase/supabase-js";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 
-// ── Context shape ──────────────────────────────────────────────────
+// ── Client-side auth guard ─────────────────────────────────────────
 
-export interface ChecklistContextValue {
-  state: CheckState;
-  dispatch: React.Dispatch<ChecklistAction>;
-  selectedDay: string;
-  setSelectedDay: (day: string) => void;
-  todayName: string;
-  tasks: Task[];
-  blocks: { label: string; items: Task[] }[];
-  dayChecks: Record<string, boolean>;
-  done: number;
-  total: number;
-  progress: number;
-  toggleTask: (taskId: string) => void;
-  dayProgressMap: Record<string, number>;
-}
+function AuthGuard({ children }: { children: ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
-const ChecklistContext = createContext<ChecklistContextValue | null>(null);
+  const isPublicRoute =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/error");
 
-/**
- * Access the checklist state from any child component.
- * Must be called within `<Providers>`.
- */
-export function useChecklistContext(): ChecklistContextValue {
-  const ctx = useContext(ChecklistContext);
-  if (ctx === null) {
-    throw new Error("useChecklistContext must be used within <Providers>");
+  useEffect(() => {
+    if (!isLoading && !user && !isPublicRoute) {
+      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [isLoading, user, isPublicRoute, router, pathname]);
+
+  // Show nothing while checking auth (prevents flash)
+  if (isLoading && !isPublicRoute) {
+    return null;
   }
-  return ctx;
+
+  return <>{children}</>;
 }
 
 // ── Provider ───────────────────────────────────────────────────────
 
-export default function Providers({ children }: { children: ReactNode }) {
-  const checklist = useChecklist();
-
-  // Wire up localStorage persistence — dispatch is stable from useReducer
-  useLocalStorage(checklist.state, checklist.dispatch);
-
+/**
+ * Providers — top-level client providers.
+ *
+ * Wraps children with AuthProvider + AuthGuard.
+ * ChecklistContext has been retired — completion state is now owned
+ * by useCompletions (in HomeClient) backed by Supabase task_completions.
+ * useMicroHabits continues to use its own useLocalStorage independently.
+ */
+export default function Providers({
+  children,
+  session = null,
+}: {
+  children: ReactNode;
+  session?: Session | null;
+}) {
   return (
-    <ChecklistContext.Provider
-      value={{
-        state: checklist.state,
-        dispatch: checklist.dispatch,
-        selectedDay: checklist.selectedDay,
-        setSelectedDay: checklist.setSelectedDay,
-        todayName: checklist.todayName,
-        tasks: checklist.tasks,
-        blocks: checklist.blocks,
-        dayChecks: checklist.dayChecks,
-        done: checklist.done,
-        total: checklist.total,
-        progress: checklist.progress,
-        toggleTask: checklist.toggleTask,
-        dayProgressMap: checklist.dayProgressMap,
-      }}
-    >
-      {children}
-    </ChecklistContext.Provider>
+    <AuthProvider initialSession={session}>
+      <AuthGuard>{children}</AuthGuard>
+    </AuthProvider>
   );
 }

@@ -1,60 +1,40 @@
 "use client";
 
-import { DAYS, PAL } from "@/data/constants";
+import { buildDayRange } from "@/data/dates";
 import styles from "./DayTabs.module.css";
 
 interface Props {
   selectedDay: string;
-  todayName: string;
-  dayProgressMap: Record<string, number>;
   onSelect: (day: string) => void;
 }
 
 /**
- * Seven scrollable day tabs with per-day mini progress bars.
- * The active tab uses the day's color palette for the bottom border and text.
- * Today's tab shows a 🟢 indicator.
+ * Seven date-based day tabs following Stitch design.
+ * Builds day range starting from yesterday via buildDayRange().
+ * Each tab shows abbreviation + date number stacked vertically.
+ * No per-day progress bars — pure visual day selector.
  */
-export default function DayTabs({
-  selectedDay,
-  todayName,
-  dayProgressMap,
-  onSelect,
-}: Props) {
-  return (
-    <nav className={styles.tabs} role="tablist" aria-label="Días de la semana">
-      {DAYS.map((day) => {
-        const isToday = day === todayName;
-        const isSelected = day === selectedDay;
-        const palette = PAL[day];
-        const progress = dayProgressMap[day] ?? 0;
+export default function DayTabs({ selectedDay, onSelect }: Props) {
+  const days = buildDayRange();
 
+  return (
+    <nav className={styles.nav} role="tablist" aria-label="Días de la semana">
+      {days.map((item) => {
+        const isSelected = item.dayName === selectedDay;
         return (
           <button
-            key={day}
+            key={item.dayName}
             role="tab"
             aria-selected={isSelected}
-            className={`${styles.tab} ${isSelected ? styles.active : ""}`}
-            style={{
-              borderBottomColor: isSelected ? palette.border : "transparent",
-            }}
-            onClick={() => onSelect(day)}
+            className={`${styles.tab} ${isSelected ? styles.activeTab : ""}`}
+            onClick={() => onSelect(item.dayName)}
           >
             <span
-              className={`${styles.tabLabel} ${isSelected ? styles.activeLabel : ""}`}
-              style={isSelected ? { color: palette.header } : undefined}
+              className={`${styles.abbr} ${isSelected ? styles.activeAbbr : ""}`}
             >
-              {day.slice(0, 3)}
-              {isToday ? "🟢" : ""}
+              {item.abbreviation}
             </span>
-            {progress > 0 && (
-              <div className={styles.progressTrack}>
-                <div
-                  className={styles.progressBar}
-                  style={{ width: `${progress}%`, background: palette.border }}
-                />
-              </div>
-            )}
+            <span className={styles.dateNumber}>{item.date}</span>
           </button>
         );
       })}

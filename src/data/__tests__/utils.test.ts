@@ -5,32 +5,32 @@ import type { Task } from "../types";
 describe("resolvePersonStyle", () => {
   it("returns D style for D person", () => {
     const style = resolvePersonStyle("D");
-    expect(style.bg).toBe("#DBEAFE");
-    expect(style.color).toBe("#1D4ED8");
+    expect(style.bg).toBe("#E8E4DD");
+    expect(style.color).toBe("#0F0D0C");
   });
 
   it("returns A style for A person", () => {
     const style = resolvePersonStyle("A");
-    expect(style.bg).toBe("#FCE7F3");
-    expect(style.color).toBe("#BE185D");
+    expect(style.bg).toBe("#F0EDE6");
+    expect(style.color).toBe("#0F0D0C");
   });
 
   it("returns Rot style for Rot person", () => {
     const style = resolvePersonStyle("Rot");
-    expect(style.bg).toBe("#EDE9FE");
-    expect(style.color).toBe("#6D28D9");
+    expect(style.bg).toBe("#DDD9D2");
+    expect(style.color).toBe("#0F0D0C");
   });
 
   it("returns DA style for DA person", () => {
     const style = resolvePersonStyle("DA");
-    expect(style.bg).toBe("#DCFCE7");
-    expect(style.color).toBe("#15803D");
+    expect(style.bg).toBe("var(--color-lime)");
+    expect(style.color).toBe("#0F0D0C");
   });
 
   it("falls back to DA style for unknown person", () => {
     const style = resolvePersonStyle("X");
-    expect(style.bg).toBe("#DCFCE7");
-    expect(style.color).toBe("#15803D");
+    expect(style.bg).toBe("var(--color-lime)");
+    expect(style.color).toBe("#0F0D0C");
   });
 });
 

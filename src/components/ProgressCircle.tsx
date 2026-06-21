@@ -4,43 +4,40 @@ interface Props {
   progress: number;
   done: number;
   total: number;
+  variant?: "progress" | "streak";
 }
 
-const RADIUS = 22;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
 /**
- * SVG progress circle using stroke-dasharray.
- * Always shows green (#22C55E) to match the original checklist.js.
+ * Horizontal progress bar replacing the former SVG circle.
+ *
+ * - Simple track + fill divs with percentage text.
+ * - `variant` prop is accepted for interface compatibility but
+ *   currently has no visual effect (always lime).
+ * - Used only in tests as of Phase 5 — Header renders its own
+ *   inline progress bar directly.
  */
-export default function ProgressCircle({ progress, done, total }: Props) {
-  const offset = CIRCUMFERENCE * (1 - progress / 100);
-
+export default function ProgressCircle({
+  progress,
+  done,
+  total,
+  variant: _variant,
+}: Props) {
   return (
-    <div className={styles.wrapper}>
-      <svg
-        className={styles.svg}
-        viewBox="0 0 52 52"
-        aria-label={`${progress}% completo — ${done} de ${total}`}
-      >
-        {/* Background track */}
-        <circle
-          className={styles.track}
-          cx="26"
-          cy="26"
-          r={RADIUS}
+    <div
+      className={styles.wrapper}
+      role="progressbar"
+      aria-label={`${progress}% completo — ${done} de ${total}`}
+      aria-valuenow={progress}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
+      <span className={styles.label}>{progress}%</span>
+      <div className={styles.track}>
+        <div
+          className={styles.fill}
+          style={{ width: `${progress}%` }}
         />
-        {/* Progress arc */}
-        <circle
-          className={styles.arc}
-          cx="26"
-          cy="26"
-          r={RADIUS}
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={offset}
-        />
-      </svg>
-      <div className={styles.label}>{progress}%</div>
+      </div>
     </div>
   );
 }

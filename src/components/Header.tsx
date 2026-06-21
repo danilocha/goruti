@@ -1,4 +1,5 @@
-import ProgressCircle from "./ProgressCircle";
+"use client";
+
 import styles from "./Header.module.css";
 
 interface Props {
@@ -8,43 +9,32 @@ interface Props {
   total: number;
 }
 
-const LEGENDS: [string, string, string, string][] = [
-  ["D",    "#DBEAFE", "#1D4ED8", "Daniel"],
-  ["A",    "#FCE7F3", "#BE185D", "Tu novia"],
-  ["Rot",  "#EDE9FE", "#6D28D9", "Rotan"],
-  ["D+A",  "#DCFCE7", "#15803D", "Los dos"],
-];
-
 /**
- * Gradient header bar showing the day name, legend badges, and progress circle.
- * Matches the original checklist.js exactly.
+ * Stitch-style fixed header with calendar icon, uppercase day name,
+ * and a horizontal progress bar with inline percentage.
+ *
+ * - No subtitle "Rutina de Hogar"
+ * - No legend badges
+ * - No user email / sign-out button (moved to SettingsPanel)
  */
-export default function Header({ dayName, progress, done, total }: Props) {
+export default function Header({ dayName, progress }: Props) {
   return (
     <header className={styles.header}>
-      <div className={styles.topRow}>
-        <div>
-          <div className={styles.subtitle}>Rutina de Hogar</div>
-          <h1 className={styles.dayName}>{dayName}</h1>
-        </div>
-        <div>
-          <ProgressCircle progress={progress} done={done} total={total} />
-        </div>
+      <div className={styles.inner}>
+      <div className={styles.leftSection}>
+        <span className="material-symbols-outlined">calendar_today</span>
+        <h1 className={styles.dayName}>{dayName.toUpperCase()}</h1>
       </div>
 
-      {/* Legend */}
-      <div className={styles.legend}>
-        {LEGENDS.map(([label, bg, color, name]) => (
-          <span key={label} className={styles.legendItem}>
-            <span
-              className={styles.legendBadge}
-              style={{ background: bg, color }}
-            >
-              {label}
-            </span>
-            <span className={styles.legendName}>{name}</span>
-          </span>
-        ))}
+      <div className={styles.rightSection}>
+        <span className={styles.progressLabel}>{progress}%</span>
+        <div className={styles.progressTrack}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
       </div>
     </header>
   );

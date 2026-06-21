@@ -1,3 +1,6 @@
+@import "../styles/tokens.css";
+@import "material-symbols/outlined.css";
+
 /* ── Reset & Base ──────────────────────────────────────────────── */
 
 *,
@@ -6,10 +9,21 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  /* Smooth theme-switch transitions across all themed elements */
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
 }
 
 html {
   height: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
 }
 
 html,
@@ -22,11 +36,12 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: #111827;
-  background: #F1F5F9;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  font-family: var(--font-dm-sans), var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
@@ -40,6 +55,6 @@ button {
 
 /* Remove default button focus outline; add custom focus-visible */
 button:focus-visible {
-  outline: 2px solid #3B82F6;
+  outline: 2px solid var(--color-info);
   outline-offset: 2px;
 }

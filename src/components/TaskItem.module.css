@@ -1,123 +1,177 @@
-.item {
+/* ── Container (label / row) ────────────────────────────────────── */
+
+.container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 14px;
-  border-bottom: 1px solid #F1F5F9;
+  gap: 8px;
+  padding: 8px;
+  background: var(--surface-container);
+  border-radius: 12px;
   cursor: pointer;
-  background: transparent;
-  transition: background 0.15s;
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
-.item:last-child {
-  border-bottom: none;
+.container:hover {
+  background: var(--surface-container-high);
+  border-color: var(--outline-variant);
 }
 
-.item:hover {
-  background: #FAFAFA;
-}
-
-.item.checked {
-  background: #F0FDF4;
-}
-
-.item.work {
+/* Work items (noCheck) — no interactive cursor */
+.work {
   cursor: default;
 }
 
-.checkboxCol {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-}
+/* ── Checkbox: native input, CSS-styled ──────────────────────────── */
 
 .checkbox {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 2px solid #D1D5DB;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid var(--outline);
+  background: transparent;
+  cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.15s;
+  position: relative;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
-.checkboxChecked {
-  border-color: #22C55E;
-  background: #22C55E;
+.checkbox:checked {
+  background: var(--color-lime);
+  border-color: var(--color-lime);
 }
 
-.checkmark {
-  color: #fff;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
+/* Custom checkmark — hidden by default, shown on :checked */
+.checkbox::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.1s;
 }
 
-.iconOnly {
-  font-size: 14px;
-}
-
-.time {
-  font-size: 11px;
-  font-weight: 700;
-  min-width: 36px;
-  font-variant-numeric: tabular-nums;
+.checkbox:checked::after {
   opacity: 1;
-  transition: opacity 0.15s;
-  /* Uses CSS Custom Property set on parent container */
-  color: var(--day-header, #1D4ED8);
 }
 
-.timeChecked {
-  opacity: 0.5;
-}
+/* ── Content area (direct sibling of checkbox) ───────────────────── */
 
 .content {
   flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+  min-width: 0;
+}
+
+/* Checked via sibling selector */
+.checkbox:checked + .content {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+/* ── Task row (icon + text block) ────────────────────────────────── */
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.taskIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.taskInfo {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
 .taskName {
-  font-size: 13px;
-  color: #111827;
+  font-size: 16px;
   font-weight: 500;
-  text-decoration: none;
-  line-height: 1.3;
-  word-break: break-word;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.taskNameChecked {
-  color: #9CA3AF;
-  font-weight: 400;
-  text-decoration: line-through;
+.taskTime {
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
-.taskIcon {
-  margin-right: 4px;
+.taskNote {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
 }
 
-.note {
-  font-size: 10px;
-  color: #9CA3AF;
-  margin-top: 1px;
-}
+/* ── Assignee badge (personal / legacy) ─────────────────────────── */
 
 .badge {
-  border-radius: 999px;
   padding: 2px 8px;
-  font-size: 10px;
-  font-weight: 800;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
   flex-shrink: 0;
-  opacity: 1;
-  transition: opacity 0.15s;
+  margin-left: 8px;
 }
 
-.badgeChecked {
-  opacity: 0.5;
+/* ── Member status badges (shared groups) ────────────────────────── */
+
+.memberBadges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.memberCircle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+/* Done state — filled green circle */
+.memberCircleDone {
+  background: var(--color-lime, #a3e635);
+  color: #166534;
+  border: 1.5px solid transparent;
+}
+
+/* Pending state — outline circle */
+.memberCirclePending {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1.5px solid var(--outline-variant, #ccc);
+}
+
+/* Current user's circle — subtle ring to distinguish "tú" */
+.memberCircleMe {
+  outline: 2px solid var(--color-lime, #a3e635);
+  outline-offset: 1px;
 }

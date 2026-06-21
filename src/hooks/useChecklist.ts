@@ -1,107 +1,99 @@
 "use client";
 
-import { useReducer, useMemo, useCallback, useState } from "react";
-import { checklistReducer } from "@/data/reducer";
-import type { DayName } from "@/data/types";
-import { DAYS } from "@/data/constants";
-import { buildTasks } from "@/data/tasks";
-import { getProgress, groupByBlock } from "@/data/utils";
-
-/** Map JS getDay() (0=Sunday) to our DayName */
-const TODAY_NAMES: string[] = [
-  "Domingo",
-  "Lunes",
-  "Martes",
-  "Miércoles",
-  "Jueves",
-  "Viernes",
-  "Sábado",
-];
+import { useMemo } from "react";
+import type { DayName, RoutineTask, Task } from "@/data/types";
+import { groupByBlock } from "@/data/utils";
+import { getProgress } from "@/data/utils";
 
 /**
- * Central state hook for the checklist.
+ * useChecklist — derives display-ready task data from server-fetched RoutineTask[].
  *
- * - Uses `useReducer` with the pure `checklistReducer` from the data layer
- * - Derives tasks, blocks, progress, and per-day progress map
- * - All derived values are memoized with `useMemo`
- * - `toggleTask` dispatches TOGGLE_TASK for the currently selected day
+ * New signature: useChecklist(tasks: RoutineTask[], dayName: DayName)
+ *
+ * - Filters tasks by schedule.days for the selected day
+ * - Orders by block, then position (sortOrder)
+ * - Maps RoutineTask → legacy Task shape expected by TaskBlock / TaskItem
+ * - Computes progress (done / total checkable tasks)
+ *
+ * Note: "done" count is computed from the dayChecks passed in, not internal state.
+ * Completion state is owned by useCompletions.
  */
-export function useChecklist() {
-  const [state, dispatch] = useReducer(checklistReducer, {});
+export function useChecklist(tasks: RoutineTask[], dayName: DayName) {
+  // Filter by schedule for the selected day
+  const filteredTasks = useMemo(() => {
+    const dayTasks = tasks.filter((t) => t.schedule.days.includes(dayName));
 
-  // ── Selected day ────────────────────────────────────────────────
-  const [selectedDay, setSelectedDay] = useState<string>(() => {
-    const todayIdx = new Date().getDay();
-    const name = TODAY_NAMES[todayIdx];
-    return DAYS.includes(name as DayName) ? name : "Lunes";
-  });
+    // Build block-order map: the first position a block appears determines its rank.
+    // We sort by position first so we get the minimum-position item per block.
+    const byPosition = [...dayTasks].sort((a, b) => a.position - b.position);
+    const blockOrder = new Map<string, number>();
+    for (const t of byPosition) {
+      const key = t.block ?? "";
+      if (!blockOrder.has(key)) blockOrder.set(key, blockOrder.size);
+    }
 
-  const dayIdx = DAYS.indexOf(selectedDay as DayName);
+    return dayTasks.sort((a, b) => {
+      const aRank = blockOrder.get(a.block ?? "") ?? 0;
+      const bRank = blockOrder.get(b.block ?? "") ?? 0;
+      if (aRank !== bRank) return aRank - bRank;
+      return a.position - b.position;
+    });
+  }, [tasks, dayName]);
 
-  // ── Today's name (constant for the session) ─────────────────────
-  const todayName = useMemo<string>(() => {
-    return TODAY_NAMES[new Date().getDay()];
-  }, []);
-
-  // ── Derived state for the selected day ──────────────────────────
-  const tasks = useMemo(() => buildTasks(selectedDay, dayIdx), [selectedDay, dayIdx]);
-
-  const blocks = useMemo(() => groupByBlock(tasks), [tasks]);
-
-  const dayChecks = useMemo<Record<string, boolean>>(
-    () => state[selectedDay] ?? {},
-    [state, selectedDay],
+  // Map RoutineTask → legacy Task shape for UI components
+  const legacyTasks = useMemo<Task[]>(
+    () =>
+      filteredTasks.map((t) => ({
+        id: t.id,
+        time: t.timeLabel ?? "",
+        block: t.block ?? "Sin bloque",
+        task: t.name,
+        // assignedTo is stored as string[] | null; map to Person for badge display
+        who: mapAssignedTo(t.assignedTo),
+        icon: t.icon ?? "•",
+        note: t.note ?? undefined,
+        noCheck: t.noCheck,
+      })),
+    [filteredTasks],
   );
 
-  const checkable = useMemo(() => tasks.filter((t) => !t.noCheck), [tasks]);
+  const blocks = useMemo(() => groupByBlock(legacyTasks), [legacyTasks]);
 
-  const done = useMemo(
-    () => checkable.filter((t) => dayChecks[t.id]).length,
-    [checkable, dayChecks],
+  const checkable = useMemo(
+    () => legacyTasks.filter((t) => !t.noCheck),
+    [legacyTasks],
   );
 
   const total = checkable.length;
 
-  const progress = useMemo(
-    () => getProgress(done, total),
-    [done, total],
-  );
-
-  // ── Per-day progress for tab mini-bars ─────────────────────────
-  const dayProgressMap = useMemo<Record<string, number>>(() => {
-    const map: Record<string, number> = {};
-    for (const day of DAYS) {
-      const idx = DAYS.indexOf(day);
-      const dayTasks = buildTasks(day, idx);
-      const ct = dayTasks.filter((t) => !t.noCheck).length;
-      const dd = dayTasks.filter((t) => state[day]?.[t.id]).length;
-      map[day] = getProgress(dd, ct);
-    }
-    return map;
-  }, [state]);
-
-  // ── Actions ────────────────────────────────────────────────────
-  const toggleTask = useCallback(
-    (taskId: string) => {
-      dispatch({ type: "TOGGLE_TASK", day: selectedDay, taskId });
-    },
-    [dispatch, selectedDay],
-  );
-
   return {
-    state,
-    dispatch,
-    selectedDay,
-    setSelectedDay,
-    todayName,
-    tasks,
+    filteredTasks,
+    tasks: legacyTasks,
     blocks,
-    dayChecks,
     checkable,
-    done,
     total,
-    progress,
-    toggleTask,
-    dayProgressMap,
+    // done and progress are computed by caller (HomeClient) using useCompletions
+    done: 0,
+    progress: 0,
   } as const;
+}
+
+// ── Progress helpers ───────────────────────────────────────────────────────────
+
+export { getProgress };
+
+// ── Shape adapter ──────────────────────────────────────────────────────────────
+
+import type { Person } from "@/data/types";
+
+/**
+ * Maps the assignedTo array (or null) from RoutineTask to the legacy Person type.
+ * Fase 1: all tasks have assignedTo = null → default to "DA".
+ */
+function mapAssignedTo(assignedTo: string[] | null): Person {
+  if (!assignedTo || assignedTo.length === 0) return "DA";
+  if (assignedTo.length >= 2) return "DA";
+  const who = assignedTo[0];
+  if (who === "D" || who === "A" || who === "Rot" || who === "DA") return who as Person;
+  return "DA";
 }

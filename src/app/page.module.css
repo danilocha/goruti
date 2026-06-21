@@ -1,10 +1,48 @@
 .page {
   min-height: 100vh;
-  background: #F1F5F9;
-  font-family: "Segoe UI", system-ui, sans-serif;
-  padding-bottom: 48px;
+  background: var(--bg-page);
+  font-family: var(--font-dm-sans), var(--font-body);
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.content {
+  padding-top: calc(var(--header-height) + 4px);
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  min-height: 100vh;
 }
 
 .main {
-  padding: 14px 13px 0;
+  padding: 0 12px 24px;
+  max-width: 720px;
+  margin: 0 auto;
 }
+
+@media (min-width: 480px) {
+  .main {
+    padding: 0 16px 24px;
+  }
+}
+
+/* ── Placeholder view (Progreso tab) ──────────────────────────── */
+
+.placeholder {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.placeholder h2 {
+  font-family: var(--font-syne), var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.placeholder p {
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+

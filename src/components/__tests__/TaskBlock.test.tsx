@@ -118,9 +118,10 @@ describe("TaskBlock", () => {
       />
     );
 
-    // task-1 is checked so it should show checkmark
-    const checkmarks = screen.getAllByText("✓");
-    expect(checkmarks.length).toBe(1);
+    // task-1 is checked, task-2 is not
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes[0]).toBeChecked();
+    expect(checkboxes[1]).not.toBeChecked();
   });
 
   it("renders expand/collapse label correctly", () => {
@@ -133,7 +134,7 @@ describe("TaskBlock", () => {
       />
     );
 
-    // Default state is expanded
+    // Default state is expanded — button says "colapsar"
     expect(
       screen.getByRole("button", { name: /colapsar/i })
     ).toBeInTheDocument();

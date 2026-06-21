@@ -1,0 +1,107 @@
+/* ── TaskEditor form ──────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface-container);
+  border-radius: 12px;
+  border: 1px solid var(--outline-variant);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--outline-variant);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--color-lime);
+}
+
+.error {
+  font-size: 12px;
+  color: #f43f5e;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.checkRow input[type="checkbox"] {
+  accent-color: var(--color-lime);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btnPrimary {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-lime);
+  color: #0f0d0c;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.85;
+}
+
+.btnSecondary {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--outline-variant);
+  background: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnSecondary:hover {
+  background: var(--surface-container-high);
+}

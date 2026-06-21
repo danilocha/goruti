@@ -12,16 +12,30 @@ describe("ProgressCircle", () => {
   it("renders aria-label with progress info", () => {
     render(<ProgressCircle progress={75} done={3} total={4} />);
 
-    const svg = screen.getByLabelText("75% completo — 3 de 4");
-    expect(svg).toBeInTheDocument();
+    const bar = screen.getByLabelText("75% completo — 3 de 4");
+    expect(bar).toBeInTheDocument();
   });
 
-  it("renders SVG with correct viewBox", () => {
+  it("renders a progressbar role element", () => {
     render(<ProgressCircle progress={75} done={3} total={4} />);
 
-    const svg = document.querySelector("svg");
-    expect(svg).toBeInTheDocument();
-    expect(svg).toHaveAttribute("viewBox", "0 0 52 52");
+    const bar = screen.getByRole("progressbar");
+    expect(bar).toBeInTheDocument();
+  });
+
+  it("sets aria-valuenow to the progress value", () => {
+    render(<ProgressCircle progress={75} done={3} total={4} />);
+
+    const bar = screen.getByRole("progressbar");
+    expect(bar).toHaveAttribute("aria-valuenow", "75");
+  });
+
+  it("sets aria-valuemin and aria-valuemax", () => {
+    render(<ProgressCircle progress={75} done={3} total={4} />);
+
+    const bar = screen.getByRole("progressbar");
+    expect(bar).toHaveAttribute("aria-valuemin", "0");
+    expect(bar).toHaveAttribute("aria-valuemax", "100");
   });
 
   it("displays 0% when progress is 0", () => {
@@ -36,10 +50,15 @@ describe("ProgressCircle", () => {
     expect(screen.getByText("100%")).toBeInTheDocument();
   });
 
-  it("renders two circles (track + arc)", () => {
+  it("does not render an SVG element", () => {
     render(<ProgressCircle progress={75} done={3} total={4} />);
 
-    const circles = document.querySelectorAll("circle");
-    expect(circles.length).toBe(2);
+    expect(document.querySelector("svg")).not.toBeInTheDocument();
+  });
+
+  it("accepts variant prop without error", () => {
+    render(<ProgressCircle progress={50} done={2} total={4} variant="streak" />);
+
+    expect(screen.getByText("50%")).toBeInTheDocument();
   });
 });

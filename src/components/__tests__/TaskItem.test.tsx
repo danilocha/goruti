@@ -45,48 +45,55 @@ describe("TaskItem", () => {
     expect(screen.getByText("A note about this task")).toBeInTheDocument();
   });
 
-  it("renders checkbox when not noCheck", () => {
+  it("renders a checkbox when not noCheck", () => {
     render(<TaskItem task={baseTask} checked={false} onToggle={vi.fn()} />);
 
-    const item = screen.getByRole("button");
-    expect(item).toBeInTheDocument();
+    const checkbox = screen.getByRole("checkbox");
+    expect(checkbox).toBeInTheDocument();
   });
 
-  it("does not render checkbox for noCheck tasks", () => {
+  it("does not render a checkbox for noCheck tasks", () => {
     const workTask: Task = { ...baseTask, noCheck: true };
     render(<TaskItem task={workTask} checked={false} onToggle={vi.fn()} />);
 
-    // noCheck tasks should not have role="button"
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
-  it("calls onToggle when clicked", () => {
+  it("calls onToggle when checkbox is changed", () => {
     const onToggle = vi.fn();
     render(<TaskItem task={baseTask} checked={false} onToggle={onToggle} />);
 
-    const item = screen.getByRole("button");
-    fireEvent.click(item);
+    const checkbox = screen.getByRole("checkbox");
+    fireEvent.click(checkbox);
 
     expect(onToggle).toHaveBeenCalledWith("test-1");
   });
 
-  it("shows checkmark when checked", () => {
+  it("checkbox is checked when checked prop is true", () => {
     render(<TaskItem task={baseTask} checked={true} onToggle={vi.fn()} />);
 
-    expect(screen.getByText("✓")).toBeInTheDocument();
+    const checkbox = screen.getByRole("checkbox");
+    expect(checkbox).toBeChecked();
+  });
+
+  it("checkbox is unchecked when checked prop is false", () => {
+    render(<TaskItem task={baseTask} checked={false} onToggle={vi.fn()} />);
+
+    const checkbox = screen.getByRole("checkbox");
+    expect(checkbox).not.toBeChecked();
   });
 
   it("shows correct aria-label for checked task", () => {
     render(<TaskItem task={baseTask} checked={true} onToggle={vi.fn()} />);
 
-    const item = screen.getByRole("button", { name: /completado/ });
-    expect(item).toBeInTheDocument();
+    const checkbox = screen.getByRole("checkbox", { name: /completado/ });
+    expect(checkbox).toBeInTheDocument();
   });
 
   it("shows correct aria-label for unchecked task", () => {
     render(<TaskItem task={baseTask} checked={false} onToggle={vi.fn()} />);
 
-    const item = screen.getByRole("button", { name: /pendiente/ });
-    expect(item).toBeInTheDocument();
+    const checkbox = screen.getByRole("checkbox", { name: /pendiente/ });
+    expect(checkbox).toBeInTheDocument();
   });
 });

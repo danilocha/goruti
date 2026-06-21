@@ -11,6 +11,10 @@ export function almuerzoPerson(dayIdx: number): "D" | "A" {
 /**
  * Builds the full task list for a given day.
  * Mirrors the exact logic from the original checklist.js.
+ *
+ * @deprecated Internal utility for seed generation only.
+ * The public contract is `buildSeedTaskRows()` in `src/data/seedRows.ts`.
+ * See buildSeedTaskRows.test.ts for the expected behaviour.
  */
 export function buildTasks(dayName: string, dayIdx: number): Task[] {
   const alm = almuerzoPerson(dayIdx);

@@ -1,8 +1,11 @@
+// @legacy — checklistReducer is retired as part of routine-builder-v2.
+// Completion state is now owned by useCompletions backed by Supabase task_completions.
+// These tests are skipped per T-13 in tasks.md.
 import { describe, it, expect } from "vitest";
 import { checklistReducer } from "../reducer";
 import type { CheckState } from "../types";
 
-describe("checklistReducer", () => {
+describe.skip("checklistReducer", () => {
   const emptyState: CheckState = {};
 
   const populatedState: CheckState = {

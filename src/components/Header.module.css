@@ -1,53 +1,82 @@
+/* ── Fixed header (Stitch-style) ──────────────────────────────── */
+
 .header {
-  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);
-  padding: 22px 18px 14px;
-  color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-.topRow {
+/* Solid fallback when backdrop-filter is not supported */
+@supports not (backdrop-filter: blur()) {
+  .header {
+    background: var(--bg-primary);
+  }
+}
+
+.inner {
+  max-width: 1440px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  padding: 8px 16px;
 }
 
-.subtitle {
-  font-size: 10px;
-  color: #94A3B8;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 3px;
+@media (min-width: 768px) {
+  .inner {
+    padding: 8px 32px;
+  }
+}
+
+/* ── Left: calendar icon + day name ───────────────────────────── */
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .dayName {
   margin: 0;
-  font-size: 21px;
-  font-weight: 900;
-  font-family: Georgia, serif;
+  font-family: var(--font-syne), var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
   letter-spacing: -0.5px;
+  text-transform: uppercase;
+  line-height: 1.2;
 }
 
-.legend {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
+/* ── Right: percentage + progress bar ─────────────────────────── */
 
-.legendItem {
+.rightSection {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 4px;
-  font-size: 10px;
 }
 
-.legendBadge {
+.progressLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.progressTrack {
+  width: 64px;
+  height: 4px;
+  background: var(--surface-container-high);
   border-radius: 999px;
-  padding: 1px 6px;
-  font-weight: 800;
-  font-size: 10px;
-  line-height: 1.4;
+  overflow: hidden;
 }
 
-.legendName {
-  color: #94A3B8;
+.progressFill {
+  height: 100%;
+  background: var(--color-lime);
+  border-radius: 999px;
+  transition: width 0.3s ease;
 }
