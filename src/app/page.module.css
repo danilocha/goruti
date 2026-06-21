@@ -46,3 +46,21 @@
 }
 
 
+
+/* Transient error toast (e.g. completion write failed) */
+.errorToast {
+  position: fixed;
+  left: 50%;
+  bottom: 84px;
+  transform: translateX(-50%);
+  z-index: 50;
+  max-width: 90%;
+  padding: 10px 16px;
+  border-radius: var(--radius-md, 10px);
+  background: #f43f5e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}

@@ -55,7 +55,7 @@ export default function HomeClient({
 
   const { blocks, checkable, total } = useChecklist(tasks, selectedDay);
   const taskIds = tasks.map((t) => t.id);
-  const { isChecked, toggle, completedUserIds } = useCompletions(tasks, todayDate, completions, currentUserId);
+  const { isChecked, toggle, completedUserIds, failedTaskId } = useCompletions(tasks, todayDate, completions, currentUserId);
 
   // Build dayChecks Record<string, boolean> from useCompletions for TaskBlock
   const dayChecks: Record<string, boolean> = {};
@@ -181,6 +181,12 @@ export default function HomeClient({
 
         {activeTab === "settings" && <SettingsPanel groupId={groupId} />}
       </div>
+
+      {failedTaskId && (
+        <div className={styles.errorToast} role="alert">
+          No se pudo guardar. Revisá tu conexión y reintentá.
+        </div>
+      )}
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
