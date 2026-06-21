@@ -1,14 +1,15 @@
-# Checklist Persistence Specification
+# checklist-persistence Specification (Routine Builder v2 delta)
 
 ## Purpose
 
-Move completion state from flat localStorage to per-user, per-date rows in the `task_completions` 
-Supabase table. Completions are scoped by authenticated user so the schema is correct for future 
-multi-member use. The toggle interaction remains client-side (optimistic update); persistence is 
-via Supabase browser client upsert. Micro-habits retain their separate `useLocalStorage` 
-persistence.
+Move completion state from flat localStorage (`couple-life-checklist`) to per-user, per-date rows
+in the `task_completions` Supabase table. Completions are scoped by authenticated user so the
+schema is correct for future multi-member use. The toggle interaction remains client-side (optimistic
+update); persistence is via Supabase browser client upsert.
 
-## Requirements
+---
+
+## MODIFIED Requirements
 
 ### Requirement: Completion Storage — Supabase task_completions (replaces localStorage)
 
@@ -36,6 +37,8 @@ completion path.
 - WHEN they refresh the page
 - THEN task T still appears checked (loaded from Supabase, not localStorage)
 
+---
+
 ### Requirement: localStorage Removal
 
 The STORAGE_KEY `couple-life-checklist` and any `useLocalStorage` calls related to checklist
@@ -48,23 +51,7 @@ path.
 - WHEN the toggle handler runs
 - THEN no entry is written to `localStorage` under `couple-life-checklist` or any checklist key
 
-### Requirement: State Restoration
-
-Existing completions for the selected day MUST be fetched server-side alongside tasks. The Server
-Component MUST query `task_completions` for the current user and the selected date so the initial
-render reflects accurate state without a client-side loading flash.
-
-#### Scenario: State survives refresh
-
-- GIVEN 3 tasks were completed today
-- WHEN the page reloads
-- THEN those 3 tasks appear checked
-
-#### Scenario: Previously completed tasks render as checked on load
-
-- GIVEN user A completed task T yesterday
-- WHEN user A views yesterday's checklist
-- THEN task T renders as checked on initial page load (no flicker from unchecked to checked)
+---
 
 ### Requirement: Optimistic Toggle via Client Hook (useCompletions)
 
@@ -85,24 +72,22 @@ optimistic state MUST be rolled back and the user MUST receive a visual indicati
 - THEN the checkbox reverts to its previous state
 - AND a visual error indicator is shown to the user
 
-### Requirement: Completion State is User-Scoped
+---
 
-Completion state MUST be isolated by user so that multiple users of the same household routine
-see independent completion state.
+### Requirement: Completion State Loaded on Page Fetch
+
+Existing completions for the selected day MUST be fetched server-side alongside tasks. The Server
+Component MUST query `task_completions` for the current user and today's date (or the selected
+date) so the initial render reflects accurate state without a client-side loading flash.
+
+#### Scenario: Previously completed tasks render as checked on load
+
+- GIVEN user A completed task T yesterday
+- WHEN user A views yesterday's checklist
+- THEN task T renders as checked on initial page load (no flicker from unchecked to checked)
 
 #### Scenario: Completion state is user-scoped
 
 - GIVEN user A completed task T today
 - WHEN user B views the same task for today
 - THEN task T renders as unchecked for user B
-
-### Requirement: Micro-habits Retain Local Persistence
-
-Micro-habits state MUST continue to use `useLocalStorage` with the existing `goruti-micro-habits` key. 
-This requirement is OUT OF SCOPE for routine-builder-v2. No changes to micro-habits persistence.
-
-#### Scenario: Micro-habits state persists independently
-
-- GIVEN the user has micro-habits and task completions
-- WHEN the page reloads
-- THEN micro-habits restore from their own `goruti-micro-habits` key (unchanged behavior)

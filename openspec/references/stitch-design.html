@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Goruti - Routine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Syne:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .task-checkbox:checked { background-color: theme('colors.primary-container'); border-color: theme('colors.primary-container'); }
+  .task-checkbox:checked + div { color: theme('colors.surface-variant'); text-decoration: line-through; opacity: 0.5; }
+  body { min-height: max(884px, 100dvh); }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-xl antialiased selection:bg-primary-container selection:text-surface">
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile py-sm md:px-margin-desktop bg-background/90 backdrop-blur-md">
+  <div class="flex items-center gap-sm">
+    <span class="material-symbols-outlined text-on-background">calendar_today</span>
+    <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background md:font-headline-lg md:text-headline-lg tracking-tight">DOMINGO</h1>
+  </div>
+  <div class="flex flex-col items-end gap-1">
+    <span class="font-label-md text-label-md text-secondary">0%</span>
+    <div class="w-16 h-1 bg-surface-container-high rounded-full overflow-hidden">
+      <div class="h-full bg-primary-container w-0 rounded-full"></div>
+    </div>
+  </div>
+</header>
+<main class="pt-xl px-margin-mobile md:px-margin-desktop max-w-4xl mx-auto space-y-md">
+  <section class="overflow-x-auto hide-scrollbar -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0 py-sm flex gap-xs">
+    <button class="flex flex-col items-center justify-center min-w-[64px] py-sm px-xs rounded-xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors">
+      <span class="font-label-md text-label-md">VIE</span>
+      <span class="font-title-md text-title-md">29</span>
+    </button>
+    <button class="flex flex-col items-center justify-center min-w-[64px] py-sm px-xs rounded-xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors">
+      <span class="font-label-md text-label-md">SAB</span>
+      <span class="font-title-md text-title-md">30</span>
+    </button>
+    <button class="flex flex-col items-center justify-center min-w-[64px] py-sm px-xs rounded-xl bg-surface-bright border border-outline-variant text-on-background shadow-sm">
+      <span class="font-label-md text-label-md text-primary-container">DOM</span>
+      <span class="font-title-md text-title-md">1</span>
+    </button>
+    <button class="flex flex-col items-center justify-center min-w-[64px] py-sm px-xs rounded-xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors">
+      <span class="font-label-md text-label-md">LUN</span>
+      <span class="font-title-md text-title-md">2</span>
+    </button>
+    <button class="flex flex-col items-center justify-center min-w-[64px] py-sm px-xs rounded-xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors">
+      <span class="font-label-md text-label-md">MAR</span>
+      <span class="font-title-md text-title-md">3</span>
+    </button>
+    <button class="flex flex-col items-center justify-center min-w-[64px] py-sm px-xs rounded-xl bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors">
+      <span class="font-label-md text-label-md">MIE</span>
+      <span class="font-title-md text-title-md">4</span>
+    </button>
+  </section>
+  <section class="space-y-sm">
+    <h2 class="font-label-md text-label-md text-secondary tracking-widest uppercase ml-base">MAÑANA</h2>
+    <div class="space-y-xs">
+      <label class="flex items-center gap-sm p-sm bg-surface-container rounded-xl hover:bg-surface-container-high transition-colors cursor-pointer border border-transparent hover:border-outline-variant">
+        <input class="task-checkbox appearance-none w-6 h-6 rounded border border-outline bg-transparent checked:bg-primary-container checked:border-primary-container transition-colors" type="checkbox"/>
+        <div class="flex-1 flex justify-between items-center transition-all duration-200">
+          <div class="flex items-center gap-sm">
+            <span class="text-xl">🛏️</span>
+            <div class="flex flex-col">
+              <span class="font-body-lg text-body-lg">Levantarse</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">7:30</span>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-surface-variant font-label-md text-label-md text-on-surface-variant">D+A</span>
+        </div>
+      </label>
+    </div>
+  </section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-xs bg-surface/80 backdrop-blur-md rounded-t-xl md:hidden">
+  <a class="flex flex-col items-center justify-center bg-secondary-container/10 text-secondary rounded-full p-2 active:scale-90 duration-150" href="#">
+    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home_app_logo</span>
+  </a>
+  <a class="flex flex-col items-center justify-center text-muted-text p-2 hover:text-on-surface transition-all active:scale-90 duration-150" href="#">
+    <span class="material-symbols-outlined">analytics</span>
+  </a>
+  <a class="flex flex-col items-center justify-center text-muted-text p-2 hover:text-on-surface transition-all active:scale-90 duration-150" href="#">
+    <span class="material-symbols-outlined">settings</span>
+  </a>
+</nav>
+</body>
+</html>
