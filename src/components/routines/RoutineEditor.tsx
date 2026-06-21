@@ -12,6 +12,7 @@ interface Props {
   onAddTask: (routineId: string, input: TaskInput) => void;
   onUpdateTask: (taskId: string, input: TaskInput) => void;
   onDeleteTask: (taskId: string) => void;
+  onMoveTask?: (taskId: string, direction: "up" | "down") => void;
   onBack: () => void;
 }
 
@@ -26,6 +27,7 @@ export default function RoutineEditor({
   onAddTask,
   onUpdateTask,
   onDeleteTask,
+  onMoveTask,
   onBack,
 }: Props) {
   const [name, setName] = useState(routine?.name ?? "");
@@ -123,7 +125,7 @@ export default function RoutineEditor({
               <p className={styles.emptyTasks}>Sin tareas aún.</p>
             )}
 
-            {tasks.map((task) =>
+            {tasks.map((task, index) =>
               editingTaskId === task.id ? (
                 <TaskEditor
                   key={task.id}
@@ -142,6 +144,32 @@ export default function RoutineEditor({
                       .map((d) => d.slice(0, 2))
                       .join(", ")}
                   </span>
+                  {onMoveTask && (
+                    <>
+                      <button
+                        type="button"
+                        className={styles.iconBtn}
+                        aria-label="Subir tarea"
+                        disabled={index === 0}
+                        onClick={() => onMoveTask(task.id, "up")}
+                      >
+                        <span className="material-symbols-outlined">
+                          arrow_upward
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.iconBtn}
+                        aria-label="Bajar tarea"
+                        disabled={index === tasks.length - 1}
+                        onClick={() => onMoveTask(task.id, "down")}
+                      >
+                        <span className="material-symbols-outlined">
+                          arrow_downward
+                        </span>
+                      </button>
+                    </>
+                  )}
                   <button
                     type="button"
                     className={styles.iconBtn}

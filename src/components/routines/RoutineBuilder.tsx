@@ -90,6 +90,23 @@ export default function RoutineBuilder({ groupId }: Props) {
     refreshHome();
   }
 
+  async function handleMoveTask(taskId: string, direction: "up" | "down") {
+    if (view.mode !== "edit") return;
+    const routine = routines.find((r) => r.id === view.routine.id) ?? view.routine;
+    const ordered = [...routine.tasks].sort((a, b) => a.position - b.position);
+    const idx = ordered.findIndex((t) => t.id === taskId);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= ordered.length) return;
+    [ordered[idx], ordered[swapIdx]] = [ordered[swapIdx], ordered[idx]];
+    // Reassign sequential positions; persist only the ones that changed.
+    for (let i = 0; i < ordered.length; i++) {
+      if (ordered[i].position !== i) {
+        await updateTask(ordered[i].id, { position: i });
+      }
+    }
+    refreshHome();
+  }
+
   async function handleInstallTemplate(template: RoutineTemplate) {
     await installTemplate(template);
     refreshHome();
@@ -147,6 +164,7 @@ export default function RoutineBuilder({ groupId }: Props) {
           onAddTask={handleAddTask}
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
+          onMoveTask={handleMoveTask}
           onBack={() => setView({ mode: "list" })}
         />
       )}
