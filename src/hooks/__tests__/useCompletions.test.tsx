@@ -15,7 +15,9 @@ function makeQueryMock(terminalFn: () => Promise<{ error: null | { message: stri
     chain[m] = vi.fn(() => chain);
   }
   // terminal
-  (chain as Record<string, unknown>).then = (resolve: (v: { error: null }) => void) => {
+  (chain as Record<string, unknown>).then = (
+    resolve: (v: { error: null | { message: string } }) => void,
+  ) => {
     terminalFn().then(resolve);
   };
   return chain;
